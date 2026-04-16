@@ -1,0 +1,26 @@
+services:
+
+  # ─── API Gateway ─────────────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: api_gateway
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT:-3000}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      IDENTITY_SERVICE_URL: ${IDENTITY_SERVICE_URL:-http://host.docker.internal:3001/api/v1}
+      SOCIAL_SERVICE_URL: ${SOCIAL_SERVICE_URL:-http://host.docker.internal:3002/api/v1}
+      THROTTLE_TTL_MS: ${THROTTLE_TTL_MS:-60000}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-100}
+    ports:
+      - "${PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/v1/health 2>/dev/null || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
