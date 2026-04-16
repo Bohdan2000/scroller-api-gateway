@@ -14,6 +14,14 @@ async function bootstrap(): Promise<void> {
     new FastifyAdapter({ logger: false }),
   );
 
+  await app.register(require('@fastify/cors'), {
+    origin: true,          // reflect request origin — fine for mobile & local web dev
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-Forwarded-For'],
+    exposedHeaders: ['X-Request-Id'],
+  });
+
   app.setGlobalPrefix('api/v1');
 
   // Order matters: RequestId first so every subsequent layer can read the ID
