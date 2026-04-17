@@ -16,6 +16,16 @@ export class ProfilesController {
     return this.social.getMyProfile(this.ctx(req));
   }
 
+  @Post('profile/avatar/upload-url')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get presigned S3 URL for avatar upload' })
+  getAvatarUploadUrl(
+    @Body() body: unknown,
+    @Req() req: FastifyRequest & { requestId: string },
+  ): Promise<unknown> {
+    return this.social.getAvatarUploadUrl(body, this.ctx(req));
+  }
+
   @Patch('profile')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Upsert own profile' })
