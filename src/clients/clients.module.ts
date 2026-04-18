@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { IdentityClient } from './identity.client';
 import { SocialClient } from './social.client';
+import { ContentClient } from './content.client';
 
 @Module({
   imports: [
@@ -10,7 +11,7 @@ import { SocialClient } from './social.client';
       maxRedirects: 0,
     }),
   ],
-  providers: [IdentityClient, SocialClient],
-  exports: [IdentityClient, SocialClient],
+  providers: [IdentityClient, SocialClient, ContentClient],
+  exports: [IdentityClient, SocialClient, ContentClient],
 })
 export class ClientsModule {}

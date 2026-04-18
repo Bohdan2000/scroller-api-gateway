@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
 import { IdentityModule } from './proxy/identity/identity.module';
 import { SocialModule } from './proxy/social/social.module';
+import { ContentModule } from './proxy/content/content.module';
 import { HealthModule } from './health/health.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { GatewayThrottlerGuard } from './common/guards/throttler.guard';
@@ -34,6 +35,7 @@ import { GatewayThrottlerGuard } from './common/guards/throttler.guard';
     ClientsModule,
     IdentityModule,
     SocialModule,
+    ContentModule,
     HealthModule,
   ],
   providers: [
