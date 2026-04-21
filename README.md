@@ -9,7 +9,7 @@ Single entry point for the Scroller mobile app. Routes requests to downstream mi
 ## Responsibilities
 
 - **JWT validation** — verifies access token signature and expiry at the edge
-- **Routing** — proxies requests to identity-service (port 3001) and social-service (port 3002)
+- **Routing** — proxies requests to identity-service (3001), social-service (3002), content-service (3003), and feed-service (3004)
 - **Rate limiting** — 100 requests per 60 s, keyed by user ID (falls back to IP)
 - **Request tracing** — attaches `X-Request-Id` to every request and response
 - **Response envelope** — wraps all responses in `{ success, data, requestId }`
@@ -20,7 +20,7 @@ Single entry point for the Scroller mobile app. Routes requests to downstream mi
 ```bash
 cp .env.example .env
 # edit .env — set JWT_ACCESS_SECRET to match identity-service
-docker compose up -d
+npm run start:dev
 ```
 
 ## API docs
@@ -41,8 +41,10 @@ npm run start:dev
 |---|---|---|
 | `PORT` | no | HTTP port (default `3000`) |
 | `JWT_ACCESS_SECRET` | yes | Must match identity-service value exactly |
-| `IDENTITY_SERVICE_URL` | yes | Base URL of identity-service (e.g. `http://localhost:3001/api/v1`) |
-| `SOCIAL_SERVICE_URL` | yes | Base URL of social-service (e.g. `http://localhost:3002/api/v1`) |
+| `IDENTITY_SERVICE_URL` | no | Base URL of identity-service (default `http://localhost:3001/api/v1`) |
+| `SOCIAL_SERVICE_URL` | no | Base URL of social-service (default `http://localhost:3002/api/v1`) |
+| `CONTENT_SERVICE_URL` | no | Base URL of content-service (default `http://localhost:3003/api/v1`) |
+| `FEED_SERVICE_URL` | no | Base URL of feed-service (default `http://localhost:3004/api/v1`) |
 | `THROTTLE_TTL_MS` | no | Rate-limit window in ms (default `60000`) |
 | `THROTTLE_LIMIT` | no | Max requests per window (default `100`) |
 
@@ -64,8 +66,8 @@ Every response is wrapped in a standard envelope:
 {
   "success": false,
   "error": {
-    "code": "SOCIAL_001",
-    "message": "Profile not found",
+    "code": "CONTENT_001",
+    "message": "Video not found",
     "statusCode": 404
   },
   "requestId": "550e8400-e29b-41d4-a716-446655440000"
@@ -74,35 +76,72 @@ Every response is wrapped in a standard envelope:
 
 ## Route map
 
-| Method | Gateway path | Downstream |
-|---|---|---|
-| POST | `/api/v1/auth/sign-up` | identity-service |
-| POST | `/api/v1/auth/sign-in` | identity-service |
-| POST | `/api/v1/auth/refresh` | identity-service |
-| POST | `/api/v1/auth/logout` | identity-service |
-| POST | `/api/v1/auth/oauth/google` | identity-service |
-| POST | `/api/v1/auth/oauth/apple` | identity-service |
-| GET  | `/api/v1/me` | identity-service |
-| GET  | `/api/v1/me/profile` | social-service |
-| PATCH | `/api/v1/me/profile` | social-service |
-| GET  | `/api/v1/me/onboarding` | social-service |
-| PATCH | `/api/v1/me/onboarding/step1` | social-service |
-| POST | `/api/v1/me/onboarding/step2` | social-service |
-| GET  | `/api/v1/friends` | social-service |
-| GET  | `/api/v1/friends/requests` | social-service |
-| POST | `/api/v1/friends/requests` | social-service |
-| POST | `/api/v1/friends/requests/:id/accept` | social-service |
-| POST | `/api/v1/friends/requests/:id/reject` | social-service |
-| DELETE | `/api/v1/friends/:profileId` | social-service |
-| POST | `/api/v1/groups` | social-service |
-| GET  | `/api/v1/groups/:id` | social-service |
-| PATCH | `/api/v1/groups/:id` | social-service |
-| DELETE | `/api/v1/groups/:id` | social-service |
-| GET  | `/api/v1/groups/:id/members` | social-service |
-| POST | `/api/v1/groups/:id/members` | social-service |
-| PATCH | `/api/v1/groups/:id/members/:profileId` | social-service |
-| DELETE | `/api/v1/groups/:id/members/:profileId` | social-service |
-| GET  | `/api/v1/topics` | social-service (public) |
-| GET  | `/api/v1/topics/me` | social-service |
-| POST | `/api/v1/topics/me` | social-service |
-| GET  | `/api/v1/health` | gateway (public) |
+### Identity service
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/api/v1/auth/sign-up` | Public | Register with email + password |
+| POST | `/api/v1/auth/sign-in` | Public | Sign in, receive JWT pair |
+| POST | `/api/v1/auth/refresh` | Public | Refresh access token |
+| POST | `/api/v1/auth/logout` | JWT | Invalidate refresh token |
+| POST | `/api/v1/auth/oauth/google` | Public | Google OAuth sign-in |
+| POST | `/api/v1/auth/oauth/apple` | Public | Apple OAuth sign-in |
+| GET  | `/api/v1/me` | JWT | Get current user |
+
+### Social service
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET  | `/api/v1/me/profile` | JWT | Get own profile |
+| PATCH | `/api/v1/me/profile` | JWT | Update own profile |
+| GET  | `/api/v1/me/onboarding` | JWT | Get onboarding status |
+| PATCH | `/api/v1/me/onboarding/step1` | JWT | Complete step 1 |
+| POST | `/api/v1/me/onboarding/step2` | JWT | Complete step 2 |
+| GET  | `/api/v1/friends` | JWT | List friends |
+| GET  | `/api/v1/friends/requests` | JWT | List friend requests |
+| POST | `/api/v1/friends/requests` | JWT | Send a friend request |
+| POST | `/api/v1/friends/requests/:id/accept` | JWT | Accept a friend request |
+| POST | `/api/v1/friends/requests/:id/reject` | JWT | Reject a friend request |
+| DELETE | `/api/v1/friends/:profileId` | JWT | Remove a friend |
+| POST | `/api/v1/groups` | JWT | Create a group |
+| GET  | `/api/v1/groups/:id` | JWT | Get group details |
+| PATCH | `/api/v1/groups/:id` | JWT | Update a group |
+| DELETE | `/api/v1/groups/:id` | JWT | Delete a group |
+| GET  | `/api/v1/groups/:id/members` | JWT | List group members |
+| POST | `/api/v1/groups/:id/members` | JWT | Add a member |
+| PATCH | `/api/v1/groups/:id/members/:profileId` | JWT | Update member role |
+| DELETE | `/api/v1/groups/:id/members/:profileId` | JWT | Remove a member |
+| GET  | `/api/v1/topics` | Public | List all topics |
+| GET  | `/api/v1/topics/me` | JWT | Get user topic preferences |
+| POST | `/api/v1/topics/me` | JWT | Set topic preferences |
+
+### Content service
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/api/v1/videos` | JWT | Create a new video (DRAFT) |
+| GET  | `/api/v1/videos/:id` | Public | Get video by ID |
+| PATCH | `/api/v1/videos/:id` | JWT | Update video metadata |
+| DELETE | `/api/v1/videos/:id` | JWT | Delete a video |
+| POST | `/api/v1/videos/:id/upload-url` | JWT | Request a Mux direct upload URL |
+| POST | `/api/v1/videos/:id/publish` | JWT | Publish a READY video |
+| POST | `/api/v1/videos/:id/unpublish` | JWT | Unpublish (PUBLISHED → READY) |
+| GET  | `/api/v1/me/videos` | JWT | List own videos |
+| POST | `/api/v1/webhooks/mux` | Mux signature | Forward Mux webhook to content-service |
+
+### Feed service
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET  | `/api/v1/feed` | JWT | Get personalised ranked feed (includes `isLiked` per item) |
+| POST | `/api/v1/feed/events/impression` | JWT | Record which videos the user saw |
+| POST | `/api/v1/feed/events/watch` | JWT | Record watch duration |
+| POST | `/api/v1/feed/events/like` | JWT | Like a video |
+| DELETE | `/api/v1/feed/events/like/:videoId` | JWT | Unlike a video |
+| POST | `/api/v1/feed/events/share` | JWT | Record a share event |
+
+### Gateway
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET  | `/api/v1/health` | Public | Health check |
