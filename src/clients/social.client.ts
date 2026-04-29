@@ -44,6 +44,12 @@ export class SocialClient {
     return this.post('/me/onboarding/step2', body, ctx);
   }
 
+  // ─── Public profiles ────────────────────────────────────────────────────────
+
+  async searchProfiles(query: string, ctx: RequestContext): Promise<unknown> {
+    return this.get(`/profiles/search${query}`, ctx);
+  }
+
   // ─── Friends ────────────────────────────────────────────────────────────────
 
   async getFriends(query: string, ctx: RequestContext): Promise<unknown> {

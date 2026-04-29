@@ -4,6 +4,7 @@ import { IdentityClient } from './identity.client';
 import { SocialClient } from './social.client';
 import { ContentClient } from './content.client';
 import { FeedClient } from './feed.client';
+import { ChatClient } from './chat.client';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { FeedClient } from './feed.client';
       maxRedirects: 0,
     }),
   ],
-  providers: [IdentityClient, SocialClient, ContentClient, FeedClient],
-  exports: [IdentityClient, SocialClient, ContentClient, FeedClient],
+  providers: [IdentityClient, SocialClient, ContentClient, FeedClient, ChatClient],
+  exports: [IdentityClient, SocialClient, ContentClient, FeedClient, ChatClient],
 })
 export class ClientsModule {}

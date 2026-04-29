@@ -14,6 +14,9 @@ services:
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       IDENTITY_SERVICE_URL: ${IDENTITY_SERVICE_URL:-http://host.docker.internal:3001/api/v1}
       SOCIAL_SERVICE_URL: ${SOCIAL_SERVICE_URL:-http://host.docker.internal:3002/api/v1}
+      CONTENT_SERVICE_URL: ${CONTENT_SERVICE_URL:-http://host.docker.internal:3003/api/v1}
+      FEED_SERVICE_URL: ${FEED_SERVICE_URL:-http://host.docker.internal:3004/api/v1}
+      CHAT_SERVICE_URL: ${CHAT_SERVICE_URL:-http://host.docker.internal:3005/api/v1}
       THROTTLE_TTL_MS: ${THROTTLE_TTL_MS:-60000}
       THROTTLE_LIMIT: ${THROTTLE_LIMIT:-100}
     ports:
