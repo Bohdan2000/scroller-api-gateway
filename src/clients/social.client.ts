@@ -30,6 +30,10 @@ export class SocialClient {
     return this.post('/me/profile/avatar/upload-url', body, ctx);
   }
 
+  async getImageUploadUrl(body: unknown, ctx: RequestContext): Promise<unknown> {
+    return this.post('/me/profile/image-upload-url', body, ctx);
+  }
+
   // ─── Onboarding ─────────────────────────────────────────────────────────────
 
   async getOnboardingStatus(ctx: RequestContext): Promise<unknown> {
