@@ -1,0 +1,32 @@
+networks:
+  scroller-net:
+    external: true
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: api_gateway
+    restart: unless-stopped
+    env_file: .env.staging
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      IDENTITY_SERVICE_URL: http://identity_service:3001/api/v1
+      SOCIAL_SERVICE_URL: http://social_service:3002/api/v1
+      CONTENT_SERVICE_URL: http://content_service:3003/api/v1
+      FEED_SERVICE_URL: http://feed_service:3004/api/v1
+      CHAT_SERVICE_URL: http://chat_service:3005/api/v1
+      NOTIFICATIONS_SERVICE_URL: http://notifications_service:3006/api/v1
+    ports:
+      - "3000:3000"
+    networks:
+      - scroller-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/v1/health 2>/dev/null || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
