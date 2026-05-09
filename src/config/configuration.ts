@@ -9,6 +9,7 @@ export default () => ({
     contentUrl: process.env.CONTENT_SERVICE_URL ?? 'http://localhost:3003/api/v1',
     feedUrl: process.env.FEED_SERVICE_URL ?? 'http://localhost:3004/api/v1',
     chatUrl: process.env.CHAT_SERVICE_URL ?? 'http://localhost:3005/api/v1',
+    notificationsUrl: process.env.NOTIFICATIONS_SERVICE_URL ?? 'http://localhost:3006/api/v1',
   },
   throttle: {
     ttlMs: parseInt(process.env.THROTTLE_TTL_MS ?? '60000', 10),
